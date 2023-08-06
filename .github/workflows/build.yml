@@ -1,0 +1,37 @@
+name: Cantor Keyboard Build
+
+on:
+  push:
+    branches:
+      - build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up QMK Firmware
+        run: |
+          git clone --recursive https://github.com/qmk/qmk_firmware.git
+          cd qmk_firmware
+
+      - name: Build Cantor Keyboard Firmware
+        working-directory: ./qmk_firmware
+        run: |
+          cd keyboards/community/cantor
+          make cantor:default
+
+      - name: Upload Firmware
+        working-directory: ./qmk_firmware
+        run: |
+          cp ./.build/cantor_default/*.bin $GITHUB_WORKSPACE
+        # The above line copies the generated .bin file to the GitHub workspace
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware
+          path: $GITHUB_WORKSPACE/*.bin
